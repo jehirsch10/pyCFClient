@@ -4,6 +4,7 @@ import unittest
 from channelfinder.cfPropertyManager import CFPropertyManager
 import re
 import os
+from channelfinder import ChannelFinderClient
 
 from _testConf import _testConf
 
@@ -25,6 +26,9 @@ class CFPropertyManagerTest(unittest.TestCase):
         CFPropertyManager.run("cf-property-manager-test-dbl","cf-property-manager-test-cfg")
         os.remove("cf-property-manager-test-cfg")
         os.remove("cf-property-manager-test-dbl")
+        client = ChannelFinderClient()
+        client.delete(channelName = "UT:RF-Cu:1{LD}Time:ShtDwn-I")
+        
 
     def test_dbl_read(self):
         '''

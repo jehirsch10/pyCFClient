@@ -11,7 +11,7 @@ import unittest
 
 from channelfinder import ChannelFinderClient
 from channelfinder.util import ChannelUtil
-from _testConf import _testConf
+from _testConf import _testConf #@UnresolvedImport
 
 import urllib3
 
@@ -671,8 +671,8 @@ class UpdateOperationTest(unittest.TestCase):
                                              username=_testConf.get('DEFAULT', 'tagUsername'),
                                              password=_testConf.get('DEFAULT', 'tagPassword'))
         """ Test Properties and Tags """
-        self.orgTag = {u'name': u'originalTag', u'owner': self.tagOwner}
-        self.orgProp = {u'name': u'originalProp', u'owner': self.propOwner, u'value': u'originalValue'}
+        self.orgTag = {u'name': u'originalTag', u'owner': self.tagOwner, u'channels': []}
+        self.orgProp = {u'name': u'originalProp', u'owner': self.propOwner, u'value': u'originalValue', u'channels': []}
 
         self.clientTag.set(tag=self.orgTag)
         self.clientProp.set(property=self.orgProp)
@@ -755,9 +755,9 @@ class UpdateOperationTest(unittest.TestCase):
         using the lowest lever _tagOwner_ as the newOwner
         """
         ch = self.client.find(name=u'originalChannelName')[0]
-        updatedProp = {u'name': u'originalProp', u'owner': self.propOwner, u'value': u'updatedValue'}
-        newTag = {u'name': u'updatedTag', u'owner': self.tagOwner}
-        newProp = {u'name': u'newProp', u'owner': self.propOwner, u'value': u'newValue'}
+        updatedProp = {u'name': u'originalProp', u'owner': self.propOwner, u'value': u'updatedValue',u'channels': []}
+        newTag = {u'name': u'updatedTag', u'owner': self.tagOwner, u'channels': []}
+        newProp = {u'name': u'newProp', u'owner': self.propOwner, u'value': u'newValue', u'channels': []}
         try:
             self.clientTag.set(tag=newTag)
             self.clientProp.set(property=newProp)
@@ -795,7 +795,8 @@ class UpdateOperationTest(unittest.TestCase):
                         self.orgTag in ch[0][u'tags'])
         updated_prop = {u'name': u'originalProp',
                         u'owner': self.propOwner,
-                        u'value': u'newPropValue'}
+                        u'value': u'newPropValue',
+                        u'channels': []}
         self.clientCh.update(channel={u'name': u'originalChannelName',
                                       u'owner': u'newOwner',
                                       u'properties': [updated_prop],
@@ -812,25 +813,24 @@ class UpdateOperationTest(unittest.TestCase):
         Updates existing channels with new property owner, without altering original value.
         """
         prop = self.client.findProperty(propertyname=u'originalProp')
-        self.assertDictEqual(prop, {u'owner': self.propOwner,
-                                    u'channels': [],
-                                    u'name': u'originalProp',
-                                    u'value': None})
-
+        prop[u'channels'] = []
+        self.assertEqual(prop[u'owner'], self.propOwner)
+        self.assertEqual(prop[u'name'], u'originalProp')
+        self.assertEqual(prop[u'value'], None)
         updatedProperty = dict(prop)
         updatedProperty[u'owner'] = u'newOwner'
         self.clientProp.update(property=updatedProperty)
         """Check property owner"""
         prop = self.client.findProperty(propertyname=u'originalProp')
-        self.assertDictEqual(prop, {u'owner': u'newOwner',
-                                    u'channels': [],
-                                    u'name': u'originalProp',
-                                    u'value': None})
+        self.assertEqual(prop[u'owner'], u'newOwner')
+        self.assertEqual(prop[u'name'], u'originalProp')
+        self.assertEqual(prop[u'value'], None)        
         """Check existing channel"""
         ch = self.client.find(name=u'originalChannelName')
         self.assertTrue({u'owner': u'newOwner',
                          u'name': u'originalProp',
-                         u'value': u'originalValue'} in ch[0][u'properties'])
+                         u'value': u'originalValue',
+                         u'channels': []} in ch[0][u'properties'])
 
     def testUpdateTag(self):
         """
@@ -838,18 +838,21 @@ class UpdateOperationTest(unittest.TestCase):
         Updates owner in all associated channels.
         """
         tag = self.client.findTag(tagname=u'originalTag')
-        self.assertDictEqual(tag, {u'owner': self.tagOwner, u'channels': [], u'name': u'originalTag'})
+        self.assertEqual(tag[u'owner'], self.tagOwner)
+        self.assertEqual(tag[u'name'], u'originalTag')
 
         updatedTag = dict(tag)
         updatedTag[u'owner'] = u'newOwner'
         self.clientTag.update(tag=updatedTag)
         """Check tag owner"""
         tag = self.client.findTag(tagname=u'originalTag')
-        self.assertDictEqual(tag, {u'owner': u'newOwner', u'channels': [], u'name': u'originalTag'})
+        self.assertEqual(tag[u'owner'], u'newOwner')
+        self.assertEqual(tag[u'name'], u'originalTag')
         """Checks existing channel"""
         ch = self.client.find(name=u'originalChannelName')
         self.assertTrue({u'owner': u'newOwner',
-                         u'name': u'originalTag'} in ch[0][u'tags'])
+                         u'name': u'originalTag',
+                         u'channels': []} in ch[0][u'tags'])
 
     def tearDown(self):
         self.clientCh.delete(channelName=u'originalChannelName')
@@ -884,8 +887,8 @@ class UpdateAppendTest(unittest.TestCase):
 
         self.Tag1 = {u'name': u'tag1', u'owner': self.tagOwner}
         self.Tag2 = {u'name': u'tag2', u'owner': self.tagOwner}
-        self.Prop1 = {u'name': u'prop1', u'owner': self.propOwner, u'value': u'initialVal'}
-        self.Prop2 = {u'name': u'prop2', u'owner': self.propOwner, u'value': u'initialVal'}
+        self.Prop1 = {u'name': u'prop1', u'owner': self.propOwner, u'value': u'initialVal', u'channels': []}
+        self.Prop2 = {u'name': u'prop2', u'owner': self.propOwner, u'value': u'initialVal', u'channels': []}
         self.ch1 = {u'name': u'orgChannel1', u'owner': self.ChannelOwner, u'tags': [self.Tag1, self.Tag2]}
         self.ch2 = {u'name': u'orgChannel2', u'owner': self.ChannelOwner, u'tags': [self.Tag2]}
         self.ch3 = {u'name': u'orgChannel3', u'owner': self.ChannelOwner}

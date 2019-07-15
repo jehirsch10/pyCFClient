@@ -16,15 +16,15 @@ import os.path
 import sys
 if sys.version_info[0] < 3:
     # Python 2 code in this block
-    from ConfigParser import SafeConfigParser as ConfigParser
+    from ConfigParser import SafeConfigParser as ConfigParser #@UnresolvedImport
 else:
     # Python 3 code in this block
     from configparser import ConfigParser
 
 
 def __loadConfig():
-    dflt={'BaseURL':'https://barkeria-vm:8181/ChannelFinder',
-          'username' : 'cf-update',
+    dflt={'BaseURL':'http://localhost:8080/ChannelFinder',
+          'username' : 'admin',
           'password' : '1234',
           'owner' : 'cf-update',
           'channelOwner' : 'cf-channels',

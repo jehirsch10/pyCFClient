@@ -44,6 +44,8 @@ class ChannelFinderClient(object):
             self.__baseURL = self.__getDefaultConfig('BaseURL', BaseURL)
             self.__userName = self.__getDefaultConfig('username', username)
             self.__password = self.__getDefaultConfig('password', password)
+            #self.__userName = "admin"
+            #self.__password = "1234"
             if self.__userName and self.__password:
                 self.__auth = auth.HTTPBasicAuth(self.__userName, self.__password)
             else:
